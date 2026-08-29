@@ -35,10 +35,10 @@ To prevent unauthorized extraction of the private key by other local software, s
 
 ---
 
-## 4. The Zero-Knowledge Handshake Protocol
+## 4. Proof-of-Possession (Challenge–Response) Handshake Protocol
 
 When a client connects to a self-hosted server via WebSockets, the server must verify that the client actually owns the Private Key corresponding to their claimed Public Key—**without the client ever revealing the Private Key.**
-
+(This is a challenge–response proof-of-possession check rather than a general “zero-knowledge proof” protocol.)
 Client                                                     Server
 1. Connect (WS Request + Public Key)
 ├─────────────────────────────────────────────────────────►│
