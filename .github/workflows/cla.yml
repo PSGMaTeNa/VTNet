@@ -17,16 +17,17 @@ jobs:
     if: github.event_name == 'pull_request_target' || contains(github.event.comment.body, 'I hereby accept the CLA')
     steps:
       - name: "CLA Assistant Check"
-        uses: cla-assistant/github-action@v2
+        # KORREKTUR: Version exakt auf v2.5.1 fixiert
+        uses: cla-assistant/github-action@v2.5.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         with:
           path-to-signatures: 'signatures/version1/cla.json'
           path-to-document: 'https://github.com{{ github.repository }}/blob/main/CLA.md'
-          # Entwickler, die ignoriert werden (Bot-Namen korrigiert)
+          # Entwickler, die ignoriert werden
           allowlist: bot*,dependabot[bot],${{ github.repository_owner }}
 
-          # gültigen Parameter für die v2-Action
+          # Parameter für die v2-Action
           custom-notsigned-prcomment: "Thank you for your pull request! Before we can merge it, you need to accept our Contributor License Agreement (CLA). Please read the [CLA.md](https://github.com{{ github.repository }}/blob/main/CLA.md) and reply to this comment with: **I hereby accept the CLA**"
           custom-allsigned-prcomment: "All contributors have signed the CLA. Ready for review!"
