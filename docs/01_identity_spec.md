@@ -27,11 +27,11 @@ When the Tauri client is launched for the absolute first time, it checks for the
 3. An Ed25519 keypair is generated.
 
 ### Secure Local Storage
-To prevent unauthorized extraction of the private key by other local software:
+To prevent unauthorized extraction of the private key by other local software, store it in the OS credential store; the Tauri app data directory should only contain non-secret metadata (public key + keyring entry identifier).
 * **Linux:** Stored via `libsecret` / GNOME Keyring.
 * **macOS:** Stored via the native OS Keychain.
 * **Windows:** Stored via the Credential Manager (DPAPI).
-* *Implementation details:* We will use the abstraction crate `keyring-rs` inside the Rust core of Tauri to interface with these native OS secure storage systems automatically.
+* *Implementation details:* Use a Rust keyring abstraction (e.g., the `keyring` crate) to interface with these stores automatically.
 
 ---
 
