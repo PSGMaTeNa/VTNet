@@ -5,7 +5,7 @@ on:
   pull_request_target:
     types: [opened, synchronize, closed]
 
-# Erlaubt dem Workflow, den Status des Pull Requests zu ändern
+# Explizite Rechtevergabe für den GitHub-Ablauf
 permissions:
   actions: write
   contents: write
@@ -17,17 +17,16 @@ jobs:
     if: github.event_name == 'pull_request_target' || contains(github.event.comment.body, 'I hereby accept the CLA')
     steps:
       - name: "CLA Assistant Check"
-        uses: cla-assistant/github-action@v2.5.1
+        uses: cla-assistant/github-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         with:
           path-to-signatures: 'signatures/version1/cla.json'
           path-to-document: 'https://github.com{{ github.repository }}/blob/main/CLA.md'
-          # Entwickler, die ignoriert werden (z.B. du selbst oder Bots)
+          # Entwickler, die ignoriert werden (Bot-Namen korrigiert)
           allowlist: bot*,dependabot[bot],${{ github.repository_owner }}
 
-          # Die Nachricht, die der Bot im PR hinterlässt
-          prompt-message: "Thank you for your pull request! Before we can merge it, you need to accept our Contributor License Agreement (CLA). Please read the [CLA.md](https://github.com{{ github.repository }}/blob/main/CLA.md) and reply to this comment with: **I hereby accept the CLA**"
-          signed-message: "Thank you! The CLA has been successfully signed."
+          # gültigen Parameter für die v2-Action
+          custom-notsigned-prcomment: "Thank you for your pull request! Before we can merge it, you need to accept our Contributor License Agreement (CLA). Please read the [CLA.md](https://github.com{{ github.repository }}/blob/main/CLA.md) and reply to this comment with: **I hereby accept the CLA**"
           custom-allsigned-prcomment: "All contributors have signed the CLA. Ready for review!"
