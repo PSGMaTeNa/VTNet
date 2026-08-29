@@ -40,6 +40,6 @@ jobs:
           custom-notsigned-prcomment: "Thank you for your pull request! Before we can merge it, you need to accept our Contributor License Agreement (CLA). Please read the [CLA.md](https://github.com{{ github.repository }}/blob/main/CLA.md) and reply to this comment with: **I hereby accept the CLA**"
           #custom-pr-sign-comment: 'The signature to be committed in order to sign the CLA'
           #custom-allsigned-prcomment: 'pull request comment when all contributors has signed, defaults to **CLA Assistant Lite bot** All Contributors have signed the CLA.'
-           custom-allsigned-prcomment: "All contributors have signed the CLA. Ready for review!"
+          custom-allsigned-prcomment: "All contributors have signed the CLA. Ready for review!"
           #lock-pullrequest-aftermerge: false - if you don't want this bot to automatically lock the pull request after merging (default - true)
           #use-dco-flag: true - If you are using DCO instead of CLA
