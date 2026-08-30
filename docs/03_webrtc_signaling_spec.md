@@ -4,7 +4,7 @@
 Voice communication in this platform occurs within designated **Voice Rooms**. 
 Instead of a "calling/ringing" mechanism, users instantly connect to the room's audio stream upon entering the channel. 
 
-For the **Minimum Viable Product (MVP)**, a **Full-Mesh WebRTC P2P** architecture is utilized. The self-hosted Rust server acts purely as a stateless **Signaling Broker** via WebSockets, transferring connection offers, answers, and network candidates between peers. The server itself never touches, processes, or logs the actual audio/video data packets.
+For the **Minimum Viable Product (MVP)**, a **Full-Mesh WebRTC P2P** architecture is utilized. The self-hosted Rust server acts purely as a **Signaling Broker** via WebSockets (no media relay and no persistent storage), transferring connection offers, answers, and network candidates between peers. The server itself never touches, processes, or logs the actual audio/video data packets.
 
 ---
 
