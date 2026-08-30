@@ -84,6 +84,6 @@ When a user leaves the voice room or closes their app:
 
 ## 5. Security & Privacy Safeguards
 
-* **Zero Audio Logs:** Because the WebRTC traffic flows directly between clients (P2P), it is technologically impossible for the server to log or intercept voice data.
-* **Native WebRTC Encryption:** All WebRTC streams are mandatory encrypted using **DTLS-SRTP**. The encryption keys are negotiated directly between the clients during the handshake, meaning even a compromised signaling server cannot decrypt the voice traffic.
+* **No Server Media Path (by design):** In a pure P2P mesh, the server does not relay SRTP media packets, so it cannot record voice unless clients explicitly send media to it (e.g., via an SFU/relay feature).
+* **Native WebRTC Encryption:** WebRTC media is encrypted between peers using **DTLS-SRTP**; the signaling server forwards offers/answers/candidates but cannot decrypt media unless it becomes a media endpoint.
 * **IP Privacy Note:** In a P2P mesh network, clients must know each other's IP addresses to connect. For true anonymity where IPs must be hidden from peers, the architecture will migrate to an **SFU model in Phase 2**, where clients only connect to the server's IP, hiding their local network addresses from other users.
