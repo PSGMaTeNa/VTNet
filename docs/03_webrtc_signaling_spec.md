@@ -30,14 +30,14 @@ Before the direct P2P connections can be established, the clients must exchange 
 All signaling messages follow a uniform JSON structure wrapper over the WebSocket connection to allow the Rust backend to route them instantly without deep inspection.
 
 ### Base Wrapper Structure
-```json
+~~~json
 {
-  "event": "voice_signaling",
+  "event": "<peer_joined|peer_left|signaling_offer|signaling_answer|ice_candidate>",
   "room_id": "string_uuid",
-  "target_uid": "recipient_public_key_hex",
+  "target_uid": "recipient_public_key_hex (optional for broadcast events)",
   "payload": { ... }
 }
-```
+~~~
 
 ### The 3 Core Signaling Stages
 
