@@ -1,2 +1,0 @@
-cargo:rustc-link-search=native=S:\ProjektmappeGitHub\VTNet\target\debug\build\webview2-com-sys-42f5124af2c5f8a8\out\x64
-cargo:rustc-link-lib=advapi32
