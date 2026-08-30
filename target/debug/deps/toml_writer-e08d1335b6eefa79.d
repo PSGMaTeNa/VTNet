@@ -1,0 +1,10 @@
+S:\ProjektmappeGitHub\VTNet\target\debug\deps\toml_writer-e08d1335b6eefa79.d: C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\lib.rs C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\integer.rs C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\key.rs C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\string.rs C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\value.rs C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\write.rs
+
+S:\ProjektmappeGitHub\VTNet\target\debug\deps\libtoml_writer-e08d1335b6eefa79.rmeta: C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\lib.rs C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\integer.rs C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\key.rs C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\string.rs C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\value.rs C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\write.rs
+
+C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\lib.rs:
+C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\integer.rs:
+C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\key.rs:
+C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\string.rs:
+C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\value.rs:
+C:\Users\lilge\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_writer-1.1.2+spec-1.1.0\src\write.rs:
