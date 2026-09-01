@@ -35,6 +35,14 @@ enum AuthenticationState {
     Authenticated(Session),
 }
 
+#[derive(Debug)]
+enum SignatureVerificationError {
+    InvalidBase64,
+    InvalidSignatureLength,
+    InvalidPublicKey,
+    SignatureMismatch,
+}
+
 /// The server reply produced by one authentication request.
 #[derive(Debug, PartialEq)]
 pub enum AuthenticationResult {
@@ -107,10 +115,14 @@ impl ConnectionAuthenticator {
                 self.state = AuthenticationState::Connected;
 
                 if now.duration_since(challenge.issued_at) > AUTH_CHALLENGE_TTL {
+                    #[cfg(debug_assertions)]
+                    eprintln!("[auth] rejected expired challenge");
                     return Self::failure(AuthFailureReason::RequestExpired);
                 }
 
-                if !Self::verify_signature(challenge, &signature_base64) {
+                if let Err(error) = Self::verify_signature(challenge, &signature_base64) {
+                    #[cfg(debug_assertions)]
+                    eprintln!("[auth] rejected response: {error:?}");
                     return Self::failure(AuthFailureReason::InvalidCredentials);
                 }
 
@@ -130,16 +142,17 @@ impl ConnectionAuthenticator {
         }
     }
 
-    fn verify_signature(challenge: AuthChallenge, signature_base64: &str) -> bool {
-        let Ok(signature_bytes) = STANDARD.decode(signature_base64) else {
-            return false;
-        };
-        let Ok(signature) = Signature::from_slice(&signature_bytes) else {
-            return false;
-        };
-        let Ok(verifying_key) = VerifyingKey::from_bytes(challenge.client_uid.as_bytes()) else {
-            return false;
-        };
+    fn verify_signature(
+        challenge: AuthChallenge,
+        signature_base64: &str,
+    ) -> Result<(), SignatureVerificationError> {
+        let signature_bytes = STANDARD
+            .decode(signature_base64)
+            .map_err(|_| SignatureVerificationError::InvalidBase64)?;
+        let signature = Signature::from_slice(&signature_bytes)
+            .map_err(|_| SignatureVerificationError::InvalidSignatureLength)?;
+        let verifying_key = VerifyingKey::from_bytes(challenge.client_uid.as_bytes())
+            .map_err(|_| SignatureVerificationError::InvalidPublicKey)?;
 
         let payload = auth_signature_payload(
             challenge.protocol_version,
@@ -148,7 +161,9 @@ impl ConnectionAuthenticator {
             challenge.client_uid,
         );
 
-        verifying_key.verify_strict(&payload, &signature).is_ok()
+        verifying_key
+            .verify_strict(&payload, &signature)
+            .map_err(|_| SignatureVerificationError::SignatureMismatch)
     }
 
     fn default_display_name(user_uid: UserUid) -> String {

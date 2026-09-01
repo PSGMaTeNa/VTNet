@@ -81,7 +81,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<Mutex<ServerState>>) {
     while let Some(Ok(frame)) = socket_receiver.next().await {
         let Message::Text(payload) = frame else {
             if matches!(frame, Message::Close(_)) {
-                return;
+                break;
             }
 
             continue;
@@ -154,6 +154,9 @@ async fn handle_authenticated_message(
                 send_to_users(&state, leaving_recipients, ServerMessage::PeerLeftRoom { room_id: from_room_id, peer_uid: session.user_uid() });
             }
             if matches!(transition, VoiceRoomTransition::Joined { .. } | VoiceRoomTransition::Switched { .. }) {
+                let _ = state.connections.get(&session.user_uid()).map(|sender| sender.send(
+                    ServerMessage::VoiceRoomJoined { room_id }
+                ));
                 send_to_users(&state, joining_recipients, ServerMessage::PeerJoinedRoom {
                     room_id,
                     peer_uid: session.user_uid(),
@@ -165,6 +168,9 @@ async fn handle_authenticated_message(
             let recipients = state.rooms.members(room_id).into_iter().flatten()
                 .copied().filter(|user_uid| *user_uid != session.user_uid()).collect::<Vec<_>>();
             if let VoiceRoomTransition::Left { .. } = state.rooms.leave_voice_room(session, room_id) {
+                let _ = state.connections.get(&session.user_uid()).map(|sender| sender.send(
+                    ServerMessage::VoiceRoomLeft { room_id }
+                ));
                 send_to_users(&state, recipients, ServerMessage::PeerLeftRoom { room_id, peer_uid: session.user_uid() });
             }
         }

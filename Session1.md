@@ -32,10 +32,10 @@ VTNet soll fuer selbst gehostete Communities einen TeamSpeak-aehnlichen `ram_voi
   - [x] Nonce pro Verbindung erzeugen, einmalig akzeptieren und nach Ablauf bzw. Verwendung verwerfen.
   - [x] Vor erfolgreicher Authentifizierung keine Raum-, Text- oder Signaling-Nachrichten verarbeiten.
 
-- [ ] **Client-Praesenz und WebRTC**
-  - [ ] Verbindung und aktive Voice-Raum-Praesenz in der Tauri/React-Oberflaeche darstellen.
-  - [ ] `PeerJoinedRoom` fuer Offer-Erstellung sowie SDP- und ICE-Routing verwenden.
-  - [ ] RAM-Text nur im aktiven Voice-Raum im React-State halten und beim Verlassen, Wechsel oder Verbindungsabbruch loeschen.
+- [x] **Client-Praesenz und WebRTC**
+  - [x] Verbindung und aktive Voice-Raum-Praesenz in der Tauri/React-Oberflaeche darstellen.
+  - [x] `PeerJoinedRoom` fuer Offer-Erstellung sowie SDP- und ICE-Routing verwenden.
+  - [x] RAM-Text nur im aktiven Voice-Raum im React-State halten und beim Verlassen, Wechsel oder Verbindungsabbruch loeschen.
 
 ## Spaetere, getrennte Epics
 
