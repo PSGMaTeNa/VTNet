@@ -20,9 +20,9 @@ VTNet soll fuer selbst gehostete Communities einen TeamSpeak-aehnlichen `ram_voi
   - [x] Serverseitig Senderidentitaet ergaenzen und Raum-/Berechtigungsmitgliedschaft fuer RAM-Text und WebRTC-Signaling pruefen.
   - [x] Tests fuer Join, Wechsel A nach B, Leave, doppeltes Leave und verspaetetes Leave fuer A nach Wechsel zu B schreiben.
 
-- [ ] **WebSocket-Transport anbinden**
-  - [ ] Client-JSON in `ClientMessage` deserialisieren und Events aus der Domainlogik als `ServerMessage` versenden.
-  - [ ] Unzulaessige oder ungueltige Nachrichten kontrolliert behandeln, ohne sensible Details zu senden oder Inhalte zu loggen.
+- [x] **WebSocket-Transport anbinden**
+  - [x] Client-JSON in `ClientMessage` deserialisieren und Events aus der Domainlogik als `ServerMessage` versenden.
+  - [x] Unzulaessige oder ungueltige Nachrichten kontrolliert behandeln, ohne sensible Details zu senden oder Inhalte zu loggen.
 
 - [ ] **Permission-Modell vorbereiten**
   - [x] Den in `docs/05_permission_model.md` beschriebenen Permission-Evaluator als Server-Abstraktion modellieren, ohne SQLite oder eine Administrationsoberflaeche vorwegzunehmen.

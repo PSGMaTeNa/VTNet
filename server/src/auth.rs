@@ -57,6 +57,20 @@ impl ConnectionAuthenticator {
         }
     }
 
+    /// Transfers the authenticated session to the connection runtime.
+    pub fn take_authenticated_session(&mut self) -> Option<Session> {
+        let AuthenticationState::Authenticated(_) = self.state else {
+            return None;
+        };
+
+        let previous_state = std::mem::replace(&mut self.state, AuthenticationState::Connected);
+        let AuthenticationState::Authenticated(session) = previous_state else {
+            unreachable!("authenticated state was checked before replacement");
+        };
+
+        Some(session)
+    }
+
     pub fn handle_message(
         &mut self,
         message: ClientMessage,
