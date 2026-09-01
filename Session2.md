@@ -9,7 +9,7 @@ Replace the temporary in-memory assumptions with a persistent server structure. 
 ## Order
 
 - [ ] **SQLite foundation**
-  - [ ] Add a SQLite dependency and a server-owned database configuration.
+  - [x] Add a SQLite dependency and a server-owned database configuration.
   - [ ] Create migrations for `server_config`, `trusted_users`, `roles`, `user_roles`, `rooms`, `room_permissions`, and `role_powers`.
   - [ ] Seed the single server configuration row and an initial administrator identity during server setup.
   - [ ] Add tests that verify schema creation and migration idempotency.

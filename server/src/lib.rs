@@ -3,8 +3,9 @@ use std::collections::{HashMap, HashSet};
 use shared::{ClientMessage, ServerMessage, UserUid};
 use uuid::Uuid;
 
-pub mod transport;
 pub mod auth;
+pub mod database;
+pub mod transport;
 
 /// Authenticated connection state relevant to voice-room presence.
 #[derive(Clone, Debug, PartialEq, Eq)]
