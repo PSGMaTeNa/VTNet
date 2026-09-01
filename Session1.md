@@ -27,10 +27,10 @@ VTNet soll fuer selbst gehostete Communities einen TeamSpeak-aehnlichen `ram_voi
 - [ ] **Permission-Modell vorbereiten**
   - [x] Den in `docs/05_permission_model.md` beschriebenen Permission-Evaluator als Server-Abstraktion modellieren, ohne SQLite oder eine Administrationsoberflaeche vorwegzunehmen.
 
-- [ ] **Authentifizierung integrieren**
-  - [ ] Verbindungszustaende `Connected`, `AuthChallengeSent` und `Authenticated` modellieren.
-  - [ ] Nonce pro Verbindung erzeugen, einmalig akzeptieren und nach Ablauf bzw. Verwendung verwerfen.
-  - [ ] Vor erfolgreicher Authentifizierung keine Raum-, Text- oder Signaling-Nachrichten verarbeiten.
+- [x] **Authentifizierung integrieren**
+  - [x] Verbindungszustaende `Connected`, `AuthChallengeSent` und `Authenticated` modellieren.
+  - [x] Nonce pro Verbindung erzeugen, einmalig akzeptieren und nach Ablauf bzw. Verwendung verwerfen.
+  - [x] Vor erfolgreicher Authentifizierung keine Raum-, Text- oder Signaling-Nachrichten verarbeiten.
 
 - [ ] **Client-Praesenz und WebRTC**
   - [ ] Verbindung und aktive Voice-Raum-Praesenz in der Tauri/React-Oberflaeche darstellen.

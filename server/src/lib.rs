@@ -4,6 +4,7 @@ use shared::{ClientMessage, ServerMessage, UserUid};
 use uuid::Uuid;
 
 pub mod transport;
+pub mod auth;
 
 /// Authenticated connection state relevant to voice-room presence.
 #[derive(Clone, Debug, PartialEq, Eq)]
