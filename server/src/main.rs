@@ -10,14 +10,13 @@ use futures_util::{SinkExt, StreamExt};
 use rand_core::{OsRng, RngCore};
 use server::{
     auth::{AuthenticationResult, ConnectionAuthenticator},
+    config::ServerConfig,
+    database::Database,
     transport::{decode_client_message, encode_server_message},
     PermissionEvaluator, RoomAction, RoomRegistry, Session, VoiceRoomTransition,
 };
 use shared::{ClientMessage, ServerMessage, UserUid, AUTH_NONCE_BYTES};
 use tokio::sync::{mpsc, Mutex};
-
-const SERVER_NAME: &str = "VTNet";
-const LISTEN_ADDRESS: &str = "127.0.0.1:3000";
 
 #[derive(Default)]
 struct AllowAllPermissions;
@@ -35,17 +34,30 @@ impl PermissionEvaluator for AllowAllPermissions {
 /// Runtime-only state shared by all currently connected WebSocket clients.
 #[derive(Default)]
 struct ServerState {
+    server_name: String,
     rooms: RoomRegistry,
     connections: HashMap<UserUid, mpsc::UnboundedSender<ServerMessage>>,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let state = Arc::new(Mutex::new(ServerState::default()));
-    let app = Router::new().route("/ws", get(websocket_handler)).with_state(state);
-    let listener = tokio::net::TcpListener::bind(LISTEN_ADDRESS).await?;
+    let config = ServerConfig::from_environment()?;
+    let mut database = Database::open(&config.database_path)?;
+    database.initialize_schema()?;
+    database.set_server_name(&config.server_name)?;
+    if let Some(administrator) = config.initial_administrator {
+        database.bootstrap_administrator(administrator.user_uid, &administrator.display_name)?;
+    }
 
-    println!("VTNet server listening on ws://{LISTEN_ADDRESS}/ws");
+    let state = Arc::new(Mutex::new(ServerState {
+        server_name: config.server_name,
+        rooms: RoomRegistry::default(),
+        connections: HashMap::new(),
+    }));
+    let app = Router::new().route("/ws", get(websocket_handler)).with_state(state);
+    let listener = tokio::net::TcpListener::bind(&config.bind_address).await?;
+
+    println!("VTNet server listening on ws://{}/ws", config.bind_address);
     axum::serve(listener, app).await?;
 
     Ok(())
@@ -59,7 +71,8 @@ async fn websocket_handler(
 }
 
 async fn handle_socket(socket: WebSocket, state: Arc<Mutex<ServerState>>) {
-    let mut authenticator = ConnectionAuthenticator::new(SERVER_NAME.to_owned());
+    let server_name = state.lock().await.server_name.clone();
+    let mut authenticator = ConnectionAuthenticator::new(server_name);
     let (mut socket_sender, mut socket_receiver) = socket.split();
     let (outbound_sender, mut outbound_receiver) = mpsc::unbounded_channel();
 

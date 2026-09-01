@@ -11,7 +11,7 @@ Replace the temporary in-memory assumptions with a persistent server structure. 
 - [ ] **SQLite foundation**
   - [x] Add a SQLite dependency and a server-owned database configuration.
   - [x] Create migrations for `server_config`, `trusted_users`, `roles`, `user_roles`, `rooms`, `room_roles`, `role_powers`, and `room_power_requirements`.
-  - [ ] Seed the single server configuration row and an initial administrator identity during server setup.
+  - [x] Seed the single server configuration row and an explicitly configured initial administrator identity during server setup.
   - [x] Add tests that verify schema creation and migration idempotency.
 
 - [ ] **Persistent room definitions**
@@ -35,8 +35,8 @@ Replace the temporary in-memory assumptions with a persistent server structure. 
   - [ ] Keep direct UUID joining only as an explicitly marked development option, if needed.
 
 - [ ] **Configuration and operational baseline**
-  - [ ] Load bind address, database path, and server name from configuration or environment variables.
-  - [ ] Preserve loopback-only binding as the default development setting.
+  - [x] Load bind address, database path, and server name from configuration or environment variables.
+  - [x] Preserve loopback-only binding as the default development setting.
   - [ ] Document LAN testing and the later requirements for WSS, STUN, and TURN.
 
 ## Out of Scope

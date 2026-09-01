@@ -1,6 +1,11 @@
 use std::path::Path;
 
-use rusqlite::Connection;
+use rusqlite::{params, Connection};
+use shared::UserUid;
+
+const ADMIN_ROLE_ID: &str = "admin";
+const ADMIN_POWER: u16 = 100;
+const POWER_ACTIONS: [&str; 5] = ["join", "speak", "write", "signal", "manage_room"];
 
 /// Owns the SQLite connection used for persistent server structure.
 pub struct Database {
@@ -88,6 +93,46 @@ impl Database {
         )
     }
 
+    pub fn set_server_name(&self, server_name: &str) -> rusqlite::Result<()> {
+        self.connection.execute(
+            "UPDATE server_config SET server_name = ?1 WHERE id = 1",
+            params![server_name],
+        )?;
+
+        Ok(())
+    }
+
+    /// Assigns the configured identity the initial administrator role during server setup.
+    pub fn bootstrap_administrator(
+        &mut self,
+        user_uid: UserUid,
+        display_name: &str,
+    ) -> rusqlite::Result<()> {
+        let transaction = self.connection.transaction()?;
+
+        transaction.execute(
+            "INSERT OR IGNORE INTO trusted_users (user_uid, display_name) VALUES (?1, ?2)",
+            params![user_uid.as_bytes(), display_name],
+        )?;
+        transaction.execute(
+            "INSERT OR IGNORE INTO roles (role_id, name) VALUES (?1, 'Administrator')",
+            params![ADMIN_ROLE_ID],
+        )?;
+        transaction.execute(
+            "INSERT OR IGNORE INTO user_roles (user_uid, role_id) VALUES (?1, ?2)",
+            params![user_uid.as_bytes(), ADMIN_ROLE_ID],
+        )?;
+
+        for action in POWER_ACTIONS {
+            transaction.execute(
+                "INSERT OR IGNORE INTO role_powers (role_id, action, power) VALUES (?1, ?2, ?3)",
+                params![ADMIN_ROLE_ID, action, ADMIN_POWER],
+            )?;
+        }
+
+        transaction.commit()
+    }
+
     fn from_connection(connection: Connection) -> rusqlite::Result<Self> {
         // SQLite does not enforce foreign keys unless every connection enables them explicitly.
         connection.execute_batch("PRAGMA foreign_keys = ON;")?;
@@ -158,5 +203,39 @@ mod tests {
             .query_row("SELECT COUNT(*) FROM server_config", [], |row| row.get(0))
             .unwrap();
         assert_eq!(config_count, 1);
+    }
+
+    #[test]
+    fn administrator_bootstrap_assigns_the_configured_identity_maximum_powers() {
+        let mut database = Database::open_in_memory().unwrap();
+        database.initialize_schema().unwrap();
+        let administrator_uid = UserUid::from_bytes([7; 32]);
+
+        database
+            .bootstrap_administrator(administrator_uid, "Ada")
+            .unwrap();
+        database
+            .bootstrap_administrator(administrator_uid, "Ada")
+            .unwrap();
+
+        let assigned_role_count: i64 = database
+            .connection()
+            .query_row(
+                "SELECT COUNT(*) FROM user_roles WHERE user_uid = ?1 AND role_id = ?2",
+                params![administrator_uid.as_bytes(), ADMIN_ROLE_ID],
+                |row| row.get(0),
+            )
+            .unwrap();
+        let highest_power: i64 = database
+            .connection()
+            .query_row(
+                "SELECT MIN(power) FROM role_powers WHERE role_id = ?1",
+                params![ADMIN_ROLE_ID],
+                |row| row.get(0),
+            )
+            .unwrap();
+
+        assert_eq!(assigned_role_count, 1);
+        assert_eq!(highest_power, i64::from(ADMIN_POWER));
     }
 }
