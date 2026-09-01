@@ -21,21 +21,21 @@ pub fn auth_signature_payload(
             + std::mem::size_of::<u16>()
             + AUTH_NONCE_BYTES
             + std::mem::size_of::<u64>()
-            + client_uid.0.len(),
+            + client_uid.as_bytes().len(),
     );
 
     payload.extend_from_slice(AUTH_DOMAIN_SEPARATOR);
     payload.extend_from_slice(&protocol_version.to_be_bytes());
     payload.extend_from_slice(&nonce);
     payload.extend_from_slice(&server_timestamp.to_be_bytes());
-    payload.extend_from_slice(&client_uid.0);
+    payload.extend_from_slice(client_uid.as_bytes());
     payload
 }
 
 /// Type-safe wrapper for an Ed25519 Public Key, enforced as a 32-byte array.
 /// Serializes to a compact Base64 string
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct UserUid(pub [u8; 32]);
+pub struct UserUid([u8; 32]);
 
 impl Serialize for UserUid {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -58,6 +58,16 @@ impl<'de> Deserialize<'de> for UserUid {
             .map_err(|_| D::Error::custom("user UID must decode to exactly 32 bytes"))?;
 
         Ok(Self(bytes))
+    }
+}
+
+impl UserUid {
+    pub fn from_bytes(bytes: [u8; 32]) -> Self {
+        Self(bytes)
+    }
+
+    pub fn as_bytes(&self) -> &[u8; 32] {
+        &self.0
     }
 }
 
