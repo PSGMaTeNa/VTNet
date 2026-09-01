@@ -10,9 +10,9 @@ Replace the temporary in-memory assumptions with a persistent server structure. 
 
 - [ ] **SQLite foundation**
   - [x] Add a SQLite dependency and a server-owned database configuration.
-  - [ ] Create migrations for `server_config`, `trusted_users`, `roles`, `user_roles`, `rooms`, `room_permissions`, and `role_powers`.
+  - [x] Create migrations for `server_config`, `trusted_users`, `roles`, `user_roles`, `rooms`, `room_roles`, `role_powers`, and `room_power_requirements`.
   - [ ] Seed the single server configuration row and an initial administrator identity during server setup.
-  - [ ] Add tests that verify schema creation and migration idempotency.
+  - [x] Add tests that verify schema creation and migration idempotency.
 
 - [ ] **Persistent room definitions**
   - [ ] Model `ram_voice` and `e2ee_text` room types in a repository layer.
