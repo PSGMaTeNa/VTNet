@@ -89,6 +89,15 @@ pub enum AuthFailureReason {
     RateLimited,
 }
 
+/// Safe reasons why a voice-room join was not accepted.
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum VoiceRoomJoinFailureReason {
+    RoomNotFound,
+    NotAVoiceRoom,
+    Unavailable,
+}
+
 pub const MAX_TEXT_CONTENT_BYTES: usize = 4 * 1024;
 
 #[derive(Serialize, Clone, Debug, PartialEq, Eq)]
@@ -204,6 +213,12 @@ pub enum ServerMessage {
     /// Confirmation that the requesting client entered this voice room.
     VoiceRoomJoined {
         room_id: Uuid,
+    },
+
+    /// The requested room cannot be entered as a RAM voice room.
+    VoiceRoomJoinFailure {
+        room_id: Uuid,
+        reason: VoiceRoomJoinFailureReason,
     },
 
     /// Confirmation that the requesting client left this voice room.

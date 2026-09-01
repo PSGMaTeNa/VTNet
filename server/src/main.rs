@@ -12,10 +12,11 @@ use server::{
     auth::{AuthenticationResult, ConnectionAuthenticator},
     config::ServerConfig,
     database::Database,
+    rooms::{RoomRepository, VoiceRoomLookup},
     transport::{decode_client_message, encode_server_message},
     PermissionEvaluator, RoomAction, RoomRegistry, Session, VoiceRoomTransition,
 };
-use shared::{ClientMessage, ServerMessage, UserUid, AUTH_NONCE_BYTES};
+use shared::{ClientMessage, ServerMessage, UserUid, VoiceRoomJoinFailureReason, AUTH_NONCE_BYTES};
 use tokio::sync::{mpsc, Mutex};
 
 #[derive(Default)]
@@ -32,9 +33,9 @@ impl PermissionEvaluator for AllowAllPermissions {
 }
 
 /// Runtime-only state shared by all currently connected WebSocket clients.
-#[derive(Default)]
 struct ServerState {
     server_name: String,
+    database: Database,
     rooms: RoomRegistry,
     connections: HashMap<UserUid, mpsc::UnboundedSender<ServerMessage>>,
 }
@@ -48,9 +49,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(administrator) = config.initial_administrator {
         database.bootstrap_administrator(administrator.user_uid, &administrator.display_name)?;
     }
+    if let Some(room_name) = &config.initial_ram_voice_room_name {
+        let room = RoomRepository::new(database.connection())
+            .ensure_initial_ram_voice_room(room_name)?;
+        println!("Initial RAM voice room '{}' is available as {}", room.name, room.room_id);
+    }
 
     let state = Arc::new(Mutex::new(ServerState {
         server_name: config.server_name,
+        database,
         rooms: RoomRegistry::default(),
         connections: HashMap::new(),
     }));
@@ -152,6 +159,20 @@ async fn handle_authenticated_message(
     let mut state = state.lock().await;
     match message {
         ClientMessage::JoinVoiceRoom { room_id } => {
+            let room = RoomRepository::new(state.database.connection()).validate_voice_room(room_id);
+            let failure_reason = match room {
+                Ok(VoiceRoomLookup::Found) => None,
+                Ok(VoiceRoomLookup::NotVoiceRoom) => Some(VoiceRoomJoinFailureReason::NotAVoiceRoom),
+                Ok(VoiceRoomLookup::NotFound) => Some(VoiceRoomJoinFailureReason::RoomNotFound),
+                Err(_) => Some(VoiceRoomJoinFailureReason::Unavailable),
+            };
+            if let Some(reason) = failure_reason {
+                let _ = state.connections.get(&session.user_uid()).map(|sender| sender.send(
+                    ServerMessage::VoiceRoomJoinFailure { room_id, reason }
+                ));
+                return;
+            }
+
             // Capture recipients before the transition removes the previous membership.
             let leaving_recipients = session.active_voice_room_id().map(|previous_room_id| {
                 state.rooms.members(previous_room_id).into_iter().flatten()

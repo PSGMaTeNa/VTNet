@@ -165,6 +165,18 @@ function App() {
       return;
     }
 
+    if (message.event === "voice_room_join_failure") {
+      const reason = message.payload.reason;
+      setErrorMessage(
+        reason === "room_not_found"
+          ? "This voice room does not exist."
+          : reason === "not_a_voice_room"
+            ? "This room is a persistent text channel, not a voice room."
+            : "The voice room is temporarily unavailable.",
+      );
+      return;
+    }
+
     if (message.event === "voice_room_left") {
       setActiveRoomId(null);
       setMessages([]);

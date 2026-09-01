@@ -33,6 +33,14 @@ pub struct RoomDefinition {
     pub sort_order: i64,
 }
 
+/// Result of validating a room ID for a voice-room join request.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum VoiceRoomLookup {
+    Found,
+    NotFound,
+    NotVoiceRoom,
+}
+
 /// Reads and writes persistent room definitions without holding volatile presence data.
 pub struct RoomRepository<'connection> {
     connection: &'connection Connection,
@@ -85,6 +93,37 @@ impl<'connection> RoomRepository<'connection> {
 
         Ok(room)
     }
+
+    pub fn validate_voice_room(&self, room_id: Uuid) -> rusqlite::Result<VoiceRoomLookup> {
+        Ok(match self.find(room_id)? {
+            Some(room) if room.room_type == RoomType::RamVoice => VoiceRoomLookup::Found,
+            Some(_) => VoiceRoomLookup::NotVoiceRoom,
+            None => VoiceRoomLookup::NotFound,
+        })
+    }
+
+    /// Creates the configured initial RAM voice room once and returns its stable ID on later starts.
+    pub fn ensure_initial_ram_voice_room(&self, name: &str) -> rusqlite::Result<RoomDefinition> {
+        let existing_room_id: Option<String> = self
+            .connection
+            .query_row(
+                "SELECT room_id FROM rooms WHERE name = ?1 AND room_type = 'ram_voice' ORDER BY created_at LIMIT 1",
+                params![name],
+                |row| row.get(0),
+            )
+            .optional()?;
+
+        let room_id = match existing_room_id {
+            Some(room_id) => Uuid::parse_str(&room_id).expect("rooms.room_id must contain a UUID"),
+            None => {
+                let room_id = Uuid::new_v4();
+                self.create(room_id, name, RoomType::RamVoice, 0)?;
+                room_id
+            }
+        };
+
+        Ok(self.find(room_id)?.expect("initial room must exist after creation"))
+    }
 }
 
 #[cfg(test)]
@@ -136,5 +175,37 @@ mod tests {
         let repository = RoomRepository::new(database.connection());
 
         assert_eq!(repository.find(Uuid::new_v4()).unwrap(), None);
+    }
+
+    #[test]
+    fn voice_room_validation_rejects_unknown_and_e2ee_text_rooms() {
+        let database = Database::open_in_memory().unwrap();
+        database.initialize_schema().unwrap();
+        let repository = RoomRepository::new(database.connection());
+        let voice_room_id = Uuid::new_v4();
+        let text_room_id = Uuid::new_v4();
+        repository
+            .create(voice_room_id, "General", RoomType::RamVoice, 0)
+            .unwrap();
+        repository
+            .create(text_room_id, "Staff", RoomType::E2eeText, 1)
+            .unwrap();
+
+        assert_eq!(repository.validate_voice_room(voice_room_id).unwrap(), VoiceRoomLookup::Found);
+        assert_eq!(repository.validate_voice_room(text_room_id).unwrap(), VoiceRoomLookup::NotVoiceRoom);
+        assert_eq!(repository.validate_voice_room(Uuid::new_v4()).unwrap(), VoiceRoomLookup::NotFound);
+    }
+
+    #[test]
+    fn initial_ram_voice_room_seed_is_idempotent() {
+        let database = Database::open_in_memory().unwrap();
+        database.initialize_schema().unwrap();
+        let repository = RoomRepository::new(database.connection());
+
+        let first_room = repository.ensure_initial_ram_voice_room("General").unwrap();
+        let second_room = repository.ensure_initial_ram_voice_room("General").unwrap();
+
+        assert_eq!(first_room, second_room);
+        assert_eq!(first_room.room_type, RoomType::RamVoice);
     }
 }

@@ -14,6 +14,7 @@ pub struct ServerConfig {
     pub database_path: PathBuf,
     pub server_name: String,
     pub initial_administrator: Option<InitialAdministrator>,
+    pub initial_ram_voice_room_name: Option<String>,
 }
 
 pub struct InitialAdministrator {
@@ -29,6 +30,7 @@ impl ServerConfig {
             env::var("VTNET_SERVER_NAME").ok(),
             env::var("VTNET_INITIAL_ADMIN_UID").ok(),
             env::var("VTNET_INITIAL_ADMIN_DISPLAY_NAME").ok(),
+            env::var("VTNET_INITIAL_RAM_VOICE_ROOM_NAME").ok(),
         )
     }
 
@@ -38,6 +40,7 @@ impl ServerConfig {
         server_name: Option<String>,
         administrator_uid: Option<String>,
         administrator_name: Option<String>,
+        initial_ram_voice_room_name: Option<String>,
     ) -> Result<Self, String> {
         let initial_administrator = administrator_uid
             .filter(|value| !value.is_empty())
@@ -58,6 +61,7 @@ impl ServerConfig {
             ),
             server_name: server_name.unwrap_or_else(|| DEFAULT_SERVER_NAME.to_owned()),
             initial_administrator,
+            initial_ram_voice_room_name: initial_ram_voice_room_name.filter(|value| !value.is_empty()),
         })
     }
 }
@@ -79,11 +83,12 @@ mod tests {
 
     #[test]
     fn defaults_keep_the_server_local_without_an_administrator() {
-        let config = ServerConfig::from_values(None, None, None, None, None).unwrap();
+        let config = ServerConfig::from_values(None, None, None, None, None, None).unwrap();
 
         assert_eq!(config.bind_address, DEFAULT_BIND_ADDRESS);
         assert_eq!(config.database_path, PathBuf::from(DEFAULT_DATABASE_PATH));
         assert!(config.initial_administrator.is_none());
+        assert!(config.initial_ram_voice_room_name.is_none());
     }
 
     #[test]
@@ -95,11 +100,27 @@ mod tests {
             None,
             Some(encoded_uid),
             Some("Ada".to_owned()),
+            None,
         )
         .unwrap();
         let administrator = config.initial_administrator.unwrap();
 
         assert_eq!(administrator.user_uid, UserUid::from_bytes([1; 32]));
         assert_eq!(administrator.display_name, "Ada");
+    }
+
+    #[test]
+    fn configured_initial_voice_room_name_is_preserved() {
+        let config = ServerConfig::from_values(
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some("General".to_owned()),
+        )
+        .unwrap();
+
+        assert_eq!(config.initial_ram_voice_room_name.as_deref(), Some("General"));
     }
 }

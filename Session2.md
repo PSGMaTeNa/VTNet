@@ -17,9 +17,10 @@ Replace the temporary in-memory assumptions with a persistent server structure. 
 - [ ] **Persistent room definitions**
   - [x] Model `ram_voice` and `e2ee_text` room types in a repository layer.
   - [x] Keep `ram_voice` limited to ephemeral presence, RAM text, and current/future WebRTC media; never treat `e2ee_text` as a voice room.
-  - [ ] Require `JoinVoiceRoom` to target an existing `ram_voice` room.
-  - [ ] Reject joins to unknown rooms and persistent E2EE rooms without changing active presence.
-  - [ ] Add tests for valid rooms, missing rooms, and invalid room types.
+  - [x] Require `JoinVoiceRoom` to target an existing `ram_voice` room.
+  - [x] Reject joins to unknown rooms and persistent E2EE rooms without changing active presence.
+  - [x] Add tests for valid rooms, missing rooms, and invalid room types.
+  - [x] Optionally seed one idempotent `ram_voice` room during server setup for local development and initial deployment.
 
 - [ ] **SQLite permission evaluator**
   - [ ] Load roles and role powers for a `UserUid` from SQLite.
