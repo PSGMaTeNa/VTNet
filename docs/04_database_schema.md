@@ -5,7 +5,7 @@ The self-hosted Rust backend utilizes **SQLite** for metadata, structural persis
 
 To honor the privacy architecture, this database operates under a strict policy for user content:
 1. **Server Structure & Settings (Plaintext):** Server settings, room names, user roles, and access rights are stored in plaintext so the Rust backend can manage permissions and route network connections.
-2. **RAM-Only Rooms (Transient):** Text communication in these channels is completely excluded from database persistence.
+2. **RAM-Only Voice Rooms (Transient):** A voice room and its bound ephemeral text chat share one room identity. Their text communication is completely excluded from database persistence.
 3. **Persistent E2EE Rooms (Encrypted):** Message history and rich media (images/files) are stored permanently, but they are strictly encrypted via End-to-End Encryption (ML-KEM/Kyber) on the client side before transmission. The server only stores unreadable cryptographic ciphertexts and binary blobs.
 
 ---
@@ -40,13 +40,13 @@ CREATE UNIQUE INDEX idx_user_uid ON trusted_users(user_uid);
 ```
 
 ### 3. `rooms`
-Defines the layout of the server. Rooms are classified by type, which dictates how the backend handles data inside the RAM or transport layer.
+Defines the layout of the server. A `ram_voice` room combines a live voice channel with its bound ephemeral text chat; a user may occupy only one such room at a time. Persistent E2EE text rooms are independent of voice-room presence.
 
 ```sql
 CREATE TABLE rooms (
     room_id TEXT PRIMARY KEY,                       -- UUID v4
     name TEXT NOT NULL,                             -- Visible room name
-    room_type TEXT NOT NULL,                        -- 'ram_text', 'e2ee_text', 'voice'
+    room_type TEXT NOT NULL,                        -- 'ram_voice', 'e2ee_text'
     sort_order INTEGER NOT NULL DEFAULT 0,          -- Layout positioning in UI
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -59,9 +59,9 @@ Manages access control on a per-room basis for cryptographic identities.
 CREATE TABLE room_permissions (
     room_id TEXT NOT NULL,
     user_uid TEXT NOT NULL,
-    can_read INTEGER NOT NULL DEFAULT 1,            -- Applicable to E2EE and RAM rooms
-    can_write INTEGER NOT NULL DEFAULT 1,
-    can_speak INTEGER NOT NULL DEFAULT 1,            -- Applicable to Voice rooms
+    can_read INTEGER NOT NULL DEFAULT 1,            -- Applicable to E2EE rooms and RAM voice rooms
+    can_write INTEGER NOT NULL DEFAULT 1,           -- Allows E2EE messages or ephemeral RAM-room text
+    can_speak INTEGER NOT NULL DEFAULT 1,           -- Applicable to RAM voice rooms
     PRIMARY KEY (room_id, user_uid),
     FOREIGN KEY (room_id) REFERENCES rooms(room_id) ON DELETE CASCADE,
     FOREIGN KEY (user_uid) REFERENCES trusted_users(user_uid) ON DELETE CASCADE
@@ -106,8 +106,8 @@ CREATE TABLE encrypted_attachments (
 
 |Data Type                 | Storage Location  | Server Visibility      | Retention Period                         |   
 |:---                      | :---              | :---                   | :---                                     |
-|**RAM Room Text**         | Volatile Memory   | Plaintext(In-flight)   | 0 milliseconds (Dropped after broadcast) |
-|**Voice/Video Data**      | None (P2P Mesh)   | None (Encrypted P2P)   | 0 milliseconds                           |
+|**RAM Voice Room Text**   | Volatile Memory   | Plaintext(In-flight)   | 0 milliseconds (Dropped after broadcast) |
+|**RAM Voice Room Media**  | None (P2P Mesh)   | None (Encrypted P2P)   | 0 milliseconds                           |
 |**E2EE Room History**     | SQLite Database   | **Ciphertext Only**    | Permanent (Until deleted by user/admin)  |
 |**Media Attachments**     | SQLite/Server Disk| **Encrypted Blobs**    | Permanent (Until deleted by user/admin)  |
 |**Server & Room Settings**| SQLite Database   | Plaintext Configuration| Permanent (Required for operation)       |

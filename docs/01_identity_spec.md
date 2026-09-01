@@ -51,16 +51,23 @@ Client                                                     Server
 
 ### Step-by-Step Flow:
 1. **Initiation:** Client opens a WebSocket connection to the server and transmits its `Public Key` as the initial greeting payload.
-2. **Challenge:** The server generates a unique, cryptographically secure 32-byte (`Nonce`) combined with a current high-precision `Timestamp` (to prevent replay attacks). The server stores this temporary challenge in its volatile memory tied to the WebSocket connection.
-3. **Signing:** The Tauri client receives the challenge, sends it to the Tauri Rust core, signs the exact sequence of `[Nonce + Timestamp]` using its locally stored `Private Key`, and transmits the resulting 64-byte signature back over the WebSocket.
-4. **Verification:** The server utilizes the client's public key to verify the signature against the issued challenge. 
-   * If the signature is valid and the timestamp is within an acceptable drift window (e.g., < 5 seconds), the connection is promoted to an **Authenticated Session**.
+2. **Challenge:** The server generates a unique, cryptographically secure 32-byte (`Nonce`) combined with a current high-precision `Timestamp`. The server stores this temporary challenge, the client's public key, and the negotiated protocol version in volatile memory tied to the WebSocket connection.
+3. **Signing:** The Tauri client receives the challenge, sends it to the Tauri Rust core, and signs the following canonical binary sequence using its locally stored `Private Key`:
+
+  ```text
+  "VTNET_AUTH_v1" | protocol_version as u16 big-endian | nonce as 32 raw bytes |
+  server_timestamp as u64 big-endian | client_public_key as 32 raw bytes
+  ```
+
+  The client transmits the resulting 64-byte Ed25519 signature as Base64. The shared `auth_signature_payload` function is the normative implementation of this sequence.
+4. **Verification:** The server utilizes the client's public key to verify the signature against the exact challenge it issued.
+  * If the signature is valid and the temporary server-side challenge has not expired (e.g., after 5 seconds), the connection is promoted to an **Authenticated Session**.
    * If it fails, the WebSocket connection is instantly terminated with a `4401 Unauthorized` frame.
 
 ---
 
 ## 5. Security & Threat Modeling
 
-* **Replay Attacks:** Mitigated by the server-side timestamp validation. An attacker intercepting a valid signature cannot reuse it later because the server will reject stale timestamps.
+* **Replay Attacks:** Mitigated by a unique, short-lived, server-side nonce which is consumed after a verification attempt. An intercepted signature cannot be reused because it is bound to one issued challenge, one public key, and one protocol version.
 * **Man-in-the-Middle (MitM):** While the handshake proves identity, the entire WebSocket transport layer must be wrapped in standard **TLS (WSS)** to prevent session hijacking.
 * **Key Loss:** Since there are no central servers, losing the local private key means losing access to that identity forever. For the MVP, this is accepted behavior (true sovereignty). Phase 3 migth introduce an encrypted backup/seed-phrase mechanism.
