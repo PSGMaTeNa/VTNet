@@ -93,7 +93,7 @@ pub const MAX_TEXT_CONTENT_BYTES: usize = 4 * 1024;
 
 #[derive(Serialize, Clone, Debug, PartialEq, Eq)]
 #[serde(transparent)]
-pub struct RoomTextContent(pub String);
+pub struct RoomTextContent(String);
 
 impl RoomTextContent {
     pub fn new(value: String) -> Result<Self, &'static str> {
