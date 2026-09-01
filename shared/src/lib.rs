@@ -201,6 +201,16 @@ pub enum ServerMessage {
         reason: AuthFailureReason,
     },
 
+    /// Confirmation that the requesting client entered this voice room.
+    VoiceRoomJoined {
+        room_id: Uuid,
+    },
+
+    /// Confirmation that the requesting client left this voice room.
+    VoiceRoomLeft {
+        room_id: Uuid,
+    },
+
     /// Broadcast: A new peer has joined the room. Existing clients must now initiate WebRTC.
     PeerJoinedRoom {
         room_id: Uuid,
