@@ -13,16 +13,19 @@ VTNet soll fuer selbst gehostete Communities einen TeamSpeak-aehnlichen `ram_voi
   - [x] `room_id` in `PeerJoinedRoom` und `PeerLeftRoom` aufnehmen, damit Clients alte Events nach einem Raumwechsel verwerfen koennen.
   - [x] Das bytegenaue, versionsbehaftete Signaturformat fuer den Auth-Handshake festlegen.
 
-- [ ] **Server-Domainlogik ohne Netzwerk implementieren**
-  - [ ] `Session` mit verifizierter Identitaet, Anzeigename und optionaler aktiver `ram_voice`-Raum-ID modellieren.
-  - [ ] `RoomRegistry` zur Verwaltung der aktiven Raumbelegung modellieren.
-  - [ ] Join, automatischen Raumwechsel und `LeaveVoiceRoom` idempotent implementieren.
-  - [ ] Serverseitig Senderidentitaet ergaenzen und Raum-/Berechtigungsmitgliedschaft fuer RAM-Text und WebRTC-Signaling pruefen.
-  - [ ] Tests fuer Join, Wechsel A nach B, Leave, doppeltes Leave und verspaetetes Leave fuer A nach Wechsel zu B schreiben.
+- [x] **Server-Domainlogik ohne Netzwerk implementieren**
+  - [x] `Session` mit verifizierter Identitaet, Anzeigename und optionaler aktiver `ram_voice`-Raum-ID modellieren.
+  - [x] `RoomRegistry` zur Verwaltung der aktiven Raumbelegung modellieren.
+  - [x] Join, automatischen Raumwechsel und `LeaveVoiceRoom` idempotent implementieren.
+  - [x] Serverseitig Senderidentitaet ergaenzen und Raum-/Berechtigungsmitgliedschaft fuer RAM-Text und WebRTC-Signaling pruefen.
+  - [x] Tests fuer Join, Wechsel A nach B, Leave, doppeltes Leave und verspaetetes Leave fuer A nach Wechsel zu B schreiben.
 
 - [ ] **WebSocket-Transport anbinden**
   - [ ] Client-JSON in `ClientMessage` deserialisieren und Events aus der Domainlogik als `ServerMessage` versenden.
   - [ ] Unzulaessige oder ungueltige Nachrichten kontrolliert behandeln, ohne sensible Details zu senden oder Inhalte zu loggen.
+
+- [ ] **Permission-Modell vorbereiten**
+  - [x] Den in `docs/05_permission_model.md` beschriebenen Permission-Evaluator als Server-Abstraktion modellieren, ohne SQLite oder eine Administrationsoberflaeche vorwegzunehmen.
 
 - [ ] **Authentifizierung integrieren**
   - [ ] Verbindungszustaende `Connected`, `AuthChallengeSent` und `Authenticated` modellieren.

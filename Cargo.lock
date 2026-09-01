@@ -3108,8 +3108,10 @@ dependencies = [
 name = "server"
 version = "0.1.0"
 dependencies = [
+ "serde_json",
  "shared",
  "tokio",
+ "uuid",
 ]
 
 [[package]]
