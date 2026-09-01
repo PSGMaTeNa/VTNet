@@ -6,6 +6,7 @@ use uuid::Uuid;
 pub mod auth;
 pub mod config;
 pub mod database;
+pub mod rooms;
 pub mod transport;
 
 /// Authenticated connection state relevant to voice-room presence.

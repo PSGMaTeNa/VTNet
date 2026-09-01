@@ -15,8 +15,8 @@ Replace the temporary in-memory assumptions with a persistent server structure. 
   - [x] Add tests that verify schema creation and migration idempotency.
 
 - [ ] **Persistent room definitions**
-  - [ ] Model `ram_voice` and `e2ee_text` room types in a repository layer.
-  - [ ] Keep `ram_voice` limited to ephemeral presence, RAM text, and current/future WebRTC media; never treat `e2ee_text` as a voice room.
+  - [x] Model `ram_voice` and `e2ee_text` room types in a repository layer.
+  - [x] Keep `ram_voice` limited to ephemeral presence, RAM text, and current/future WebRTC media; never treat `e2ee_text` as a voice room.
   - [ ] Require `JoinVoiceRoom` to target an existing `ram_voice` room.
   - [ ] Reject joins to unknown rooms and persistent E2EE rooms without changing active presence.
   - [ ] Add tests for valid rooms, missing rooms, and invalid room types.
